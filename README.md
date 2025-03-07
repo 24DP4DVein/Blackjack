@@ -1,4 +1,5 @@
 # two_deer_casino_with_sex_narkotiki_and_rock_n_roll
+# Daniels Veinbergs un Atrjoms Semjonovs
 
 Blackjack – Konsoles spēle Python valodā
 
