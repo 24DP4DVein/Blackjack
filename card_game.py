@@ -1,38 +1,37 @@
-import random
 
 #Klass loading (Galvenais logs vai logo)
 
 #Klass with all users and save in file
 
-class BlackjackDeck: #Galvna dala
-    def init(self):
-        self.cards = self._create_deck()
-        random.shuffle(self.cards)
-        self.hand = []
+import random
+
+class BlackjackGame:
+    def __init__(self):
+        self.deck = self._create_deck()
+        random.shuffle(self.deck)
+        self.player_hand = []
+        self.dealer_hand = []
 
     def _create_deck(self):
-
         ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         suits = ['♠️', '♥️', '♦️', '♣️']
-        deck = [{'rank': rank, 'suit': suit} for rank in ranks for suit in suits]
-        return deck
+        return [{'rank': rank, 'suit': suit} for rank in ranks for suit in suits]
 
-    def deal_card(self):
-        if not self.cards:
+    def _deal_card(self, hand):
+        if not self.deck:
             print("Колода пуста! Перемешиваем заново.")
-            self.cards = self._create_deck()
-            random.shuffle(self.cards)
+            self.deck = self._create_deck()
+            random.shuffle(self.deck)
 
-        card = self.cards.pop()
-        self.hand.append(card)
-        print(f"Вы получили карту: {card['rank']} {card['suit']}")
-        self._check_score()
+        card = self.deck.pop()
+        hand.append(card)
+        return card
 
-    def _calculate_score(self):
+    def _calculate_score(self, hand):
         score = 0
         aces = 0
 
-        for card in self.hand:
+        for card in hand:
             rank = card['rank']
             if rank in 'JQK':
                 score += 10
@@ -48,25 +47,68 @@ class BlackjackDeck: #Galvna dala
 
         return score
 
-    def _check_score(self):
-        score = self._calculate_score()
-        print(f"Ваш счёт: {score}")
+    def _show_hand(self, hand):
+        return ', '.join([f"{card['rank']} {card['suit']}" for card in hand])
 
-        if score > 21:
-            print("Вы проиграли! Перебор.")
+    def _player_turn(self):
+        while True:
+            print(f"Ваши карты: {self._show_hand(self.player_hand)} (Счёт: {self._calculate_score(self.player_hand)})")
+            action = input("Введите 'hit', чтобы взять карту, или 'stand', чтобы остановиться: ").strip().lower()
+            if action == 'hit':
+                self._deal_card(self.player_hand)
+                if self._calculate_score(self.player_hand) > 21:
+                    print(f"Ваши карты: {self._show_hand(self.player_hand)} (Счёт: {self._calculate_score(self.player_hand)})")
+                    print("Вы проиграли! Перебор.")
+                    return False  
+            elif action == 'stand':
+                return True  
+            else:
+                print("Неверная команда! Введите 'hit' или 'stand'.")
 
-    def get_hand(self):
-        return ', '.join([f"{card['rank']} {card['suit']}" for card in self.hand])
+    def _dealer_turn(self):
+        print("\nХод дилера...")
+        while self._calculate_score(self.dealer_hand) < 17:
+            self._deal_card(self.dealer_hand)
 
+        dealer_score = self._calculate_score(self.dealer_hand)
+        print(f"Карты дилера: {self._show_hand(self.dealer_hand)} (Счёт: {dealer_score})")
+        return dealer_score
 
-game = BlackjackDeck()
+    def play(self):
+        print("Добро пожаловать в Блэк Джек!")
 
-while True:
-    action = input("Введите 'hit', чтобы взять карту, или 'stop', чтобы выйти: ").strip().lower()
-    if action == 'hit':
-        game.deal_card()
-    elif action == 'stop':
-        print(f"Ваши карты: {game.get_hand()}. Итоговый счёт: {game._calculate_score()}")
-        break
-    else:
-        print("Неверная команда! Введите 'hit' или 'stop'.")
+        # Раздаём карты
+        self._deal_card(self.player_hand)
+        self._deal_card(self.player_hand)
+        self._deal_card(self.dealer_hand)
+        self._deal_card(self.dealer_hand)
+
+        # Показываем карты
+        print(f"\nВаши карты: {self._show_hand(self.player_hand)} (Счёт: {self._calculate_score(self.player_hand)})")
+        print(f"Первая карта дилера: {self.dealer_hand[0]['rank']} {self.dealer_hand[0]['suit']}")
+
+        # Ход игрока
+        if not self._player_turn():
+            return
+
+        # Ход дилера
+        dealer_score = self._dealer_turn()
+        player_score = self._calculate_score(self.player_hand)
+
+        # победител
+        if dealer_score > 21 or player_score > dealer_score:
+            print("Поздравляем! Вы победили!")
+        elif player_score < dealer_score:
+            print("Дилер победил! Вы проиграли.")
+        else:
+            print("Ничья!")
+
+# Запуск игры
+if __name__ == "__main__":
+    while True:
+        game = BlackjackGame()
+        game.play()
+        again = input("\nХотите сыграть ещё раз? (yes/no): ").strip().lower()
+        if again != "yes":
+            print("Спасибо за игру!")
+            break
