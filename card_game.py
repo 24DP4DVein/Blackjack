@@ -1,6 +1,10 @@
 import random
 
-class BlackjackDeck:
+#Klass loading (Galvenais logs vai logo)
+
+#Klass with all users and save in file
+
+class BlackjackDeck: #Galvna dala
     def init(self):
         self.cards = self._create_deck()
         random.shuffle(self.cards)
