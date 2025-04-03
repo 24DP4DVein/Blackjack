@@ -1,114 +1,201 @@
-
-#Klass loading (Galvenais logs vai logo)
-
-#Klass with all users and save in file
-
 import random
+import os
 
-class BlackjackGame:
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+#izveidot klase ar logu "hello our casino"
+
+
+#izveidot klasse ar top player
+
+
+class Registration:
     def __init__(self):
-        self.deck = self._create_deck()
-        random.shuffle(self.deck)
-        self.player_hand = []
-        self.dealer_hand = []
+        self.players = {}
 
-    def _create_deck(self):
-        ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-        suits = ['♠️', '♥️', '♦️', '♣️']
-        return [{'rank': rank, 'suit': suit} for rank in ranks for suit in suits]
-
-    def _deal_card(self, hand):
-        if not self.deck:
-            print("Колода пуста! Перемешиваем заново.")
-            self.deck = self._create_deck()
-            random.shuffle(self.deck)
-
-        card = self.deck.pop()
-        hand.append(card)
-        return card
-
-    def _calculate_score(self, hand):
-        score = 0
-        aces = 0
-
-        for card in hand:
-            rank = card['rank']
-            if rank in 'JQK':
-                score += 10
-            elif rank == 'A':
-                aces += 1
-                score += 11
-            else:
-                score += int(rank)
-
-        while score > 21 and aces:
-            score -= 10
-            aces -= 1
-
-        return score
-
-    def _show_hand(self, hand):
-        return ', '.join([f"{card['rank']} {card['suit']}" for card in hand])
-
-    def _player_turn(self):
+    def register_player(self):
+        clear_screen()
+        print("Laipni lūdzam reģistrācijā!")
         while True:
-            print(f"Ваши карты: {self._show_hand(self.player_hand)} (Счёт: {self._calculate_score(self.player_hand)})")
-            action = input("Введите 'hit', чтобы взять карту, или 'stand', чтобы остановиться: ").strip().lower()
-            if action == 'hit':
-                self._deal_card(self.player_hand)
-                if self._calculate_score(self.player_hand) > 21:
-                    print(f"Ваши карты: {self._show_hand(self.player_hand)} (Счёт: {self._calculate_score(self.player_hand)})")
-                    print("Вы проиграли! Перебор.")
-                    return False  
-            elif action == 'stand':
-                return True  
+            username = input("Ievadiet savu lietotājvārdu: ").strip()
+            if username in self.players:
+                print("Šis lietotājvārds jau ir reģistrēts. Lūdzu, izvēlieties citu.")
             else:
-                print("Неверная команда! Введите 'hit' или 'stand'.")
+                self.players[username] = 1000  # Start with $1000
+                print(f"Lietotājvārds '{username}' veiksmīgi reģistrēts! Jūsu sākuma bilance ir $1000.")
+                return username
+            
 
-    def _dealer_turn(self):
-        print("\nХод дилера...")
-        while self._calculate_score(self.dealer_hand) < 17:
-            self._deal_card(self.dealer_hand)
+    #pievienot saglabatus datus csv faila
 
-        dealer_score = self._calculate_score(self.dealer_hand)
-        print(f"Карты дилера: {self._show_hand(self.dealer_hand)} (Счёт: {dealer_score})")
-        return dealer_score
+class Balance:
+    def __init__(self, username, registration):
+        self.username = username
+        self.registration = registration
 
-    def play(self):
-        print("Добро пожаловать в Блэк Джек!")
+    def get_balance(self):
+        return self.registration.players[self.username]
 
-        # Раздаём карты
-        self._deal_card(self.player_hand)
-        self._deal_card(self.player_hand)
-        self._deal_card(self.dealer_hand)
-        self._deal_card(self.dealer_hand)
+    def update_balance(self, amount):
+        self.registration.players[self.username] += amount
 
-        # Показываем карты
-        print(f"\nВаши карты: {self._show_hand(self.player_hand)} (Счёт: {self._calculate_score(self.player_hand)})")
-        print(f"Первая карта дилера: {self.dealer_hand[0]['rank']} {self.dealer_hand[0]['suit']}")
+    def place_bet(self):
+        while True:
+            try:
+                bet = int(input(f"Jūsu bilance ir ${self.get_balance()}. Ievadiet savu likmi: "))
+                if bet > self.get_balance():
+                    print("Jums nav pietiekami daudz līdzekļu šai likmei.")
+                elif bet <= 0:
+                    print("Likmei jābūt pozitīvai summai.")
+                else:
+                    self.update_balance(-bet)
+                    print(f"Likme ${bet} pieņemta. Atlikusī bilance: ${self.get_balance()}.")
+                    return bet
+            except ValueError:
+                print("Lūdzu, ievadiet derīgu summu.")
 
-        # Ход игрока
-        if not self._player_turn():
+    def deposit(self):
+        while True:
+            try:
+                amount = int(input("Ievadiet summu, kuru vēlaties iemaksāt: "))
+                if amount <= 0:
+                    print("Iemaksai jābūt pozitīvai summai.")
+                else:
+                    self.update_balance(amount)
+                    print(f"Jūs veiksmīgi iemaksājāt ${amount}. Jūsu jaunā bilance ir ${self.get_balance()}.")
+                    break
+            except ValueError:
+                print("Lūdzu, ievadiet derīgu summu.")
+
+class Blackjack:
+    def __init__(self):
+        self.kava = self.sagatavot_kavu()
+        random.shuffle(self.kava)
+        self.speletaja_kartis = []
+        self.dilera_kartis = []
+
+    def sagatavot_kavu(self):
+        rangi = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+        mastis = ['♠', '♥', '♦', '♣']
+        return [{'rangs': r, 'masts': m} for r in rangi for m in mastis]
+
+    def dod_karti(self, roka):
+        if not self.kava:
+            self.kava = self.sagatavot_kavu()
+            random.shuffle(self.kava)
+        karte = self.kava.pop()
+        roka.append(karte)
+        return karte
+
+    def aprekinat_punktus(self, roka):
+        punkti = 0
+        aces = 0
+        for karte in roka:
+            if karte['rangs'] in 'JQK':
+                punkti += 10
+            elif karte['rangs'] == 'A':
+                aces += 1
+                punkti += 11
+            else:
+                punkti += int(karte['rangs'])
+        while punkti > 21 and aces:
+            punkti -= 10
+            aces -= 1
+        return punkti
+
+    def paradit_kartis(self, roka):
+        return ' '.join([f"[{karte['rangs']}{karte['masts']}]" for karte in roka])
+
+    def paradit_kartis_ascii(self, roka):
+        lines = ["", "", "", "", ""]
+        for karte in roka:
+            rangs = karte['rangs']
+            masts = karte['masts']
+            lines[0] += "┌─────┐ "
+            lines[1] += f"│{rangs:<2}   │ "  # Left-aligned rank
+            lines[2] += f"│  {masts}  │ "  # Suit in the middle
+            lines[3] += f"│   {rangs:>2}│ "  # Right-aligned rank
+            lines[4] += "└─────┘ "
+        return "\n".join(lines)
+
+    def speletaja_gajiens(self, balance):
+        while True:
+            clear_screen()
+            print(f"Jūsu bilance: ${balance.get_balance()}")
+            print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {self.aprekinat_punktus(self.speletaja_kartis)})")
+            print(f"Dīlera pirmā kārts: [{self.dilera_kartis[0]['rangs']}{self.dilera_kartis[0]['masts']}]")
+            darbiba = input("'hit' - ņemt kārti, 'stand' - pietiek: ").strip().lower()
+            if darbiba == 'hit':
+                self.dod_karti(self.speletaja_kartis)
+                if self.aprekinat_punktus(self.speletaja_kartis) > 21:
+                    clear_screen()
+                    print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {self.aprekinat_punktus(self.speletaja_kartis)})")
+                    print("Jūs zaudējāt! Pārsniegts 21.")
+                    return False
+            elif darbiba == 'stand':
+                return True
+
+    def dilera_gajiens(self):
+        clear_screen()
+        print("Dīlera gājiens...")
+        while self.aprekinat_punktus(self.dilera_kartis) < 17:
+            self.dod_karti(self.dilera_kartis)
+        print(f"Dīlera kārtis:\n{self.paradit_kartis_ascii(self.dilera_kartis)} (Punkti: {self.aprekinat_punktus(self.dilera_kartis)})")
+        return self.aprekinat_punktus(self.dilera_kartis)
+
+    def spelet(self, balance):
+        clear_screen()
+        print(f"Jūsu bilance: ${balance.get_balance()}")
+        print("Laipni lūdzam Blackjack spēlē!")
+        bet = balance.place_bet()
+        self.dod_karti(self.speletaja_kartis)
+        self.dod_karti(self.speletaja_kartis)
+        self.dod_karti(self.dilera_kartis)
+        self.dod_karti(self.dilera_kartis)
+        if not self.speletaja_gajiens(balance):
+            print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {self.aprekinat_punktus(self.speletaja_kartis)})")
+            print(f"Dīlera kārtis:\n{self.paradit_kartis_ascii(self.dilera_kartis)} (Punkti: {self.aprekinat_punktus(self.dilera_kartis)})")
+            print(f"Jūs zaudējāt likmi ${bet}.")
+            print(f"Jūsu aktuālā bilance: ${balance.get_balance()}")
             return
+        dilera_punkti = self.dilera_gajiens()
+        speletaja_punkti = self.aprekinat_punktus(self.speletaja_kartis)
+        print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {speletaja_punkti})")
+        print(f"Dīlera kārtis:\n{self.paradit_kartis_ascii(self.dilera_kartis)} (Punkti: {dilera_punkti})")
+        if dilera_punkti > 21 or speletaja_punkti > dilera_punkti:
+            print(f"Apsveicam! Jūs uzvarējāt! Jūs saņemat ${bet * 2}.")
+            balance.update_balance(bet * 2)
+        elif speletaja_punkti < dilera_punkti:
+            print(f"Dīleris uzvarēja! Jūs zaudējāt likmi ${bet}.")
+            a = input("Write 't' lai turpinat:")
+            if a == "t":
+                print("ejam talak")
+            else:
+                print("ievadiet pareizi")
 
-        # Ход дилера
-        dealer_score = self._dealer_turn()
-        player_score = self._calculate_score(self.player_hand)
-
-        # победител
-        if dealer_score > 21 or player_score > dealer_score:
-            print("Поздравляем! Вы победили!")
-        elif player_score < dealer_score:
-            print("Дилер победил! Вы проиграли.")
         else:
-            print("Ничья!")
+            print(f"Neizšķirts! Jūsu likme ${bet} tiek atgriezta.")
+            balance.update_balance(bet)
+        print(f"Jūsu aktuālā bilance: ${balance.get_balance()}")
 
-# Запуск игры
 if __name__ == "__main__":
+    registration = Registration()
+    username = registration.register_player()
+    balance = Balance(username, registration)
     while True:
-        game = BlackjackGame()
-        game.play()
-        again = input("\nХотите сыграть ещё раз? (yes/no): ").strip().lower()
-        if again != "yes":
-            print("Спасибо за игру!")
+        clear_screen()
+        print(f"Jūsu bilance: ${balance.get_balance()}")
+        action = input("Izvēlieties darbību: 'play' - spēlēt, 'deposit' - iemaksāt, 'exit' - iziet: ").strip().lower()
+        if action == "play":
+            spele = Blackjack()
+            spele.spelet(balance)
+        elif action == "deposit":
+            balance.deposit()
+        elif action == "exit":
+            print(f"Paldies par spēli! Jūsu galīgā bilance ir ${balance.get_balance()}.")
             break
+        else:
+            print("Nederīga izvēle. Lūdzu, mēģiniet vēlreiz.")
