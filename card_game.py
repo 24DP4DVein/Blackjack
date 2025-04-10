@@ -1,74 +1,49 @@
 import random
 import os
+import csv
 
+CSV_FILE = "blackjack_players.csv"
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
-#izveidot klase ar logu "hello our casino"
-
-
-#izveidot klasse ar top player
-
-
 class Registration:
     def __init__(self):
-        self.players = {}
+        self.stats = {}  # username: {'games': x, 'wins': y, 'losses': z}
+        self.load_data()
+
+    def load_data(self):
+        if not os.path.exists(CSV_FILE):
+            return
+        with open(CSV_FILE, "r", newline="") as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if len(row) == 4:
+                    username, games, wins, losses = row
+                    self.stats[username] = {
+                        'games': int(games),
+                        'wins': int(wins),
+                        'losses': int(losses)
+                    }
+
+    def save_data(self):
+        with open(CSV_FILE, "w", newline="") as f:
+            writer = csv.writer(f)
+            for user, data in self.stats.items():
+                writer.writerow([user, data['games'], data['wins'], data['losses']])
 
     def register_player(self):
         clear_screen()
         print("Laipni lūdzam reģistrācijā!")
         while True:
             username = input("Ievadiet savu lietotājvārdu: ").strip()
-            if username in self.players:
-                print("Šis lietotājvārds jau ir reģistrēts. Lūdzu, izvēlieties citu.")
-            else:
-                self.players[username] = 1000  # Start with $1000
-                print(f"Lietotājvārds '{username}' veiksmīgi reģistrēts! Jūsu sākuma bilance ir $1000.")
+            if username in self.stats:
+                print(f"Laipni atpakaļ, {username}!")
                 return username
-            
-
-    #pievienot saglabatus datus csv faila
-
-class Balance:
-    def __init__(self, username, registration):
-        self.username = username
-        self.registration = registration
-
-    def get_balance(self):
-        return self.registration.players[self.username]
-
-    def update_balance(self, amount):
-        self.registration.players[self.username] += amount
-
-    def place_bet(self):
-        while True:
-            try:
-                bet = int(input(f"Jūsu bilance ir ${self.get_balance()}. Ievadiet savu likmi: "))
-                if bet > self.get_balance():
-                    print("Jums nav pietiekami daudz līdzekļu šai likmei.")
-                elif bet <= 0:
-                    print("Likmei jābūt pozitīvai summai.")
-                else:
-                    self.update_balance(-bet)
-                    print(f"Likme ${bet} pieņemta. Atlikusī bilance: ${self.get_balance()}.")
-                    return bet
-            except ValueError:
-                print("Lūdzu, ievadiet derīgu summu.")
-
-    def deposit(self):
-        while True:
-            try:
-                amount = int(input("Ievadiet summu, kuru vēlaties iemaksāt: "))
-                if amount <= 0:
-                    print("Iemaksai jābūt pozitīvai summai.")
-                else:
-                    self.update_balance(amount)
-                    print(f"Jūs veiksmīgi iemaksājāt ${amount}. Jūsu jaunā bilance ir ${self.get_balance()}.")
-                    break
-            except ValueError:
-                print("Lūdzu, ievadiet derīgu summu.")
+            else:
+                self.stats[username] = {'games': 0, 'wins': 0, 'losses': 0}
+                print(f"Lietotājvārds '{username}' veiksmīgi reģistrēts!")
+                return username
 
 class Blackjack:
     def __init__(self):
@@ -106,25 +81,21 @@ class Blackjack:
             aces -= 1
         return punkti
 
-    def paradit_kartis(self, roka):
-        return ' '.join([f"[{karte['rangs']}{karte['masts']}]" for karte in roka])
-
     def paradit_kartis_ascii(self, roka):
         lines = ["", "", "", "", ""]
         for karte in roka:
             rangs = karte['rangs']
             masts = karte['masts']
             lines[0] += "┌─────┐ "
-            lines[1] += f"│{rangs:<2}   │ "  # Left-aligned rank
-            lines[2] += f"│  {masts}  │ "  # Suit in the middle
-            lines[3] += f"│   {rangs:>2}│ "  # Right-aligned rank
+            lines[1] += f"│{rangs:<2}   │ "
+            lines[2] += f"│  {masts}  │ "
+            lines[3] += f"│   {rangs:>2}│ "
             lines[4] += "└─────┘ "
         return "\n".join(lines)
 
-    def speletaja_gajiens(self, balance):
+    def speletaja_gajiens(self):
         while True:
             clear_screen()
-            print(f"Jūsu bilance: ${balance.get_balance()}")
             print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {self.aprekinat_punktus(self.speletaja_kartis)})")
             print(f"Dīlera pirmā kārts: [{self.dilera_kartis[0]['rangs']}{self.dilera_kartis[0]['masts']}]")
             darbiba = input("'hit' - ņemt kārti, 'stand' - pietiek: ").strip().lower()
@@ -134,22 +105,9 @@ class Blackjack:
                     clear_screen()
                     print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {self.aprekinat_punktus(self.speletaja_kartis)})")
                     print("Jūs zaudējāt! Pārsniegts 21.")
-                    a = str(input("vvod: "))
-                    if a == "t":
-                        return False
-                    else:
-                        print("ievadi pareizi")
-
-                    
-                    
+                    return False
             elif darbiba == 'stand':
-                self.paradit_kartis_ascii(self.speletaja_kartis)
-                a = str(input("vvod: "))
-                if a == "t":
-                    return True
-                else:
-                    print("ievadi pareizi")
-                
+                return True
 
     def dilera_gajiens(self):
         clear_screen()
@@ -159,56 +117,94 @@ class Blackjack:
         print(f"Dīlera kārtis:\n{self.paradit_kartis_ascii(self.dilera_kartis)} (Punkti: {self.aprekinat_punktus(self.dilera_kartis)})")
         return self.aprekinat_punktus(self.dilera_kartis)
 
-    def spelet(self, balance):
+    def spelet(self):
         clear_screen()
-        print(f"Jūsu bilance: ${balance.get_balance()}")
         print("Laipni lūdzam Blackjack spēlē!")
-        bet = balance.place_bet()
+        self.speletaja_kartis = []
+        self.dilera_kartis = []
         self.dod_karti(self.speletaja_kartis)
         self.dod_karti(self.speletaja_kartis)
         self.dod_karti(self.dilera_kartis)
         self.dod_karti(self.dilera_kartis)
-        if not self.speletaja_gajiens(balance):
-            print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {self.aprekinat_punktus(self.speletaja_kartis)})")
-            print(f"Dīlera kārtis:\n{self.paradit_kartis_ascii(self.dilera_kartis)} (Punkti: {self.aprekinat_punktus(self.dilera_kartis)})")
-            print(f"Jūs zaudējāt likmi ${bet}.")
-            print(f"Jūsu aktuālā bilance: ${balance.get_balance()}")
-            return
+
+        if not self.speletaja_gajiens():
+            return "lose"
+
         dilera_punkti = self.dilera_gajiens()
         speletaja_punkti = self.aprekinat_punktus(self.speletaja_kartis)
         print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {speletaja_punkti})")
         print(f"Dīlera kārtis:\n{self.paradit_kartis_ascii(self.dilera_kartis)} (Punkti: {dilera_punkti})")
-        if dilera_punkti > 21 or speletaja_punkti > dilera_punkti:
-            print(f"Apsveicam! Jūs uzvarējāt! Jūs saņemat ${bet * 2}.")
-            balance.update_balance(bet * 2)
-        elif speletaja_punkti < dilera_punkti:
-            print(f"Dīleris uzvarēja! Jūs zaudējāt likmi ${bet}.")
-            a = input("Write 't' lai turpinat:")
-            if a == "t":
-                print("ejam talak")
-            else:
-                print("ievadiet pareizi")
 
+        if dilera_punkti > 21 or speletaja_punkti > dilera_punkti:
+            print("Apsveicam! Jūs uzvarējāt!")
+            return "win"
+        elif speletaja_punkti < dilera_punkti:
+            print("Dīleris uzvarēja! Jūs zaudējāt.")
+            return "lose"
         else:
-            print(f"Neizšķirts! Jūsu likme ${bet} tiek atgriezta.")
-            balance.update_balance(bet)
-        print(f"Jūsu aktuālā bilance: ${balance.get_balance()}")
+            print("Neizšķirts!")
+            return "draw"
 
 if __name__ == "__main__":
     registration = Registration()
-    username = registration.register_player()
-    balance = Balance(username, registration)
+
     while True:
         clear_screen()
-        print(f"Jūsu bilance: ${balance.get_balance()}")
-        action = input("Izvēlieties darbību: 'play' - spēlēt, 'deposit' - iemaksāt, 'exit' - iziet: ").strip().lower()
-        if action == "play":
-            spele = Blackjack()
-            spele.spelet(balance)
-        elif action == "deposit":
-            balance.deposit()
-        elif action == "exit":
-            print(f"Paldies par spēli! Jūsu galīgā bilance ir ${balance.get_balance()}.")
+        print("===== Blackjack =====")
+        print("1. Spēlēt")
+        print("2. Spēlētāja statistika")
+        print("3. Iziet")
+        choice = input("Izvēlies opciju (1/2/3): ").strip()
+
+        if choice == "1":
+            username = registration.register_player()
+
+            while True:
+                clear_screen()
+                stats = registration.stats[username]
+                print(f"Jūs esat pieslēdzies kā: {username}")
+                print(f"Aizvadītās spēles: {stats['games']} | Uzvaras: {stats['wins']} | Zaudējumi: {stats['losses']}")
+                action = input("Izvēlieties darbību: 'play' - spēlēt, 'exit' - iziet: ").strip().lower()
+
+                if action == "play":
+                    spele = Blackjack()
+                    result = spele.spelet()
+
+                    stats['games'] += 1
+                    if result == "win":
+                        stats['wins'] += 1
+                    elif result == "lose":
+                        stats['losses'] += 1
+
+                    registration.save_data()
+                    input("Nospiediet Enter, lai turpinātu...")
+
+                elif action == "exit":
+                    print("Paldies par spēli!")
+                    registration.save_data()
+                    break
+                else:
+                    print("Nederīga izvēle.")
+        elif choice == "2":
+            clear_screen()
+            print("===== Spēlētāju statistika pēc winrate =====\n")
+            print(f"{'Lietotājs':<15} {'Spēles':<7} {'Uzvaras':<8} {'Zaud.':<7} {'Winrate':<8}")
+            print("-" * 50)
+            sorted_players = sorted(
+                registration.stats.items(),
+                key=lambda item: (item[1]['wins'] / item[1]['games']) if item[1]['games'] > 0 else 0,
+                reverse=True
+            )
+            for username, data in sorted_players:
+                games = data['games']
+                wins = data['wins']
+                losses = data['losses']
+                winrate = (wins / games * 100) if games > 0 else 0
+                print(f"{username:<15} {games:<7} {wins:<8} {losses:<7} {winrate:.1f}%")
+            input("\nNospiediet Enter, lai atgrieztos uz galveno izvēlni...")
+
+        elif choice == "3":
+            print("Uz redzēšanos!")
             break
         else:
-            print("Nederīga izvēle. Lūdzu, mēģiniet vēlreiz.")
+            print("Nederīga izvēle.")
