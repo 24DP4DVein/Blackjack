@@ -134,9 +134,22 @@ class Blackjack:
                     clear_screen()
                     print(f"Jūsu kārtis:\n{self.paradit_kartis_ascii(self.speletaja_kartis)} (Punkti: {self.aprekinat_punktus(self.speletaja_kartis)})")
                     print("Jūs zaudējāt! Pārsniegts 21.")
-                    return False
+                    a = str(input("vvod: "))
+                    if a == "t":
+                        return False
+                    else:
+                        print("ievadi pareizi")
+
+                    
+                    
             elif darbiba == 'stand':
-                return True
+                self.paradit_kartis_ascii(self.speletaja_kartis)
+                a = str(input("vvod: "))
+                if a == "t":
+                    return True
+                else:
+                    print("ievadi pareizi")
+                
 
     def dilera_gajiens(self):
         clear_screen()
