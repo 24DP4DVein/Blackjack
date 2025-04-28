@@ -334,8 +334,6 @@ class Registration:
                 print(Fore.YELLOW + f"{game_date:<20} {result:<10} {bet:<10} {new_balance:<10.2f}")
             input(Fore.GREEN + "\nNospiediet Enter, lai atgrieztos uz izvēlni...")
 
-
-
     def display_deposits(self, username):
         clear_screen()
         print(Fore.GREEN + "===== Spēlētāja depozītu vēsture =====\n")
@@ -348,55 +346,103 @@ class Registration:
         input(Fore.GREEN + "\nNospiediet Enter, lai atgrieztos uz galveno izvēlni...")
 
     def display_statistics(self):
-        clear_screen()
-        print(Fore.GREEN + "===== Kopējā statistika =====\n")
+        while True:
+            clear_screen()
+            print(Fore.GREEN + "===== Kopējā statistika =====\n")
 
-        sorted_players = sorted(self.stats.items(), key=lambda item: item[1]['games'], reverse=True)
-        
-        print(Fore.YELLOW + f"{'Lietotājs':<15} {'Spēles':<7} {'Uzvaras':<8} {'Zaud.':<7} {'Bilance':<8}")
-        print("-" * 50)
-        
-        for username, data in sorted_players:
-            games = data['games']
-            wins = data['wins']
-            losses = data['losses']
-            balance = data['balance']
-            print(Fore.YELLOW + f"{username:<15} {games:<7} {wins:<8} {losses:<7} {balance:.2f}")
-        
-        input(Fore.GREEN + "\nNospiediet Enter, lai atgrieztos uz galveno izvēlni...")
+            sorted_players = sorted(self.stats.items(), key=lambda item: item[1]['games'], reverse=True)
+            
+            print(Fore.YELLOW + f"{'Lietotājs':<15} {'Spēles':<7} {'Uzvaras':<8} {'Zaud.':<7} {'Bilance':<8}")
+            print("-" * 50)
+
+            for username, data in sorted_players:
+                games = data['games']
+                wins = data['wins']
+                losses = data['losses']
+                balance = data['balance']
+                print(Fore.YELLOW + f"{username:<15} {games:<7} {wins:<8} {losses:<7} {balance:.2f}")
+
+            print(Fore.CYAN + "\nIzvēlieties, kā filtrēt statistiku:")
+            print("  [1] Spēles vairāk nekā X")
+            print("  [2] Uzvaras vairāk nekā X")
+            print("  [3] Bilance lielāka nekā X")
+            print("  [Enter] Atgriezties uz galveno izvēlni")
+
+            choice = input(Fore.GREEN + "\nIevadiet savu izvēli: ").strip()
+
+            if choice == "":
+                break
+
+            try:
+                threshold = float(input(Fore.CYAN + "Ievadiet slieksni (X vērtību): ").strip())
+            except ValueError:
+                print(Fore.RED + "Nepareizs ievads! Jāievada skaitlis.")
+                input(Fore.GREEN + "\nNospiediet Enter, lai turpinātu...")
+                continue
+
+            if choice == "1":
+                filtered_players = [(username, data) for username, data in self.stats.items() if data['games'] >= threshold]
+            elif choice == "2":
+                filtered_players = [(username, data) for username, data in self.stats.items() if data['wins'] >= threshold]
+            elif choice == "3":
+                filtered_players = [(username, data) for username, data in self.stats.items() if data['balance'] >= threshold]
+            else:
+                continue
+
+            clear_screen()
+            print(Fore.GREEN + "===== Filtrētā statistika =====\n")
+
+            if filtered_players:
+                print(Fore.YELLOW + f"{'Lietotājs':<15} {'Spēles':<7} {'Uzvaras':<8} {'Zaud.':<7} {'Bilance':<8}")
+                print("-" * 50)
+                for username, data in filtered_players:
+                    games = data['games']
+                    wins = data['wins']
+                    losses = data['losses']
+                    balance = data['balance']
+                    print(Fore.YELLOW + f"{username:<15} {games:<7} {wins:<8} {losses:<7} {balance:.2f}")
+            else:
+                print(Fore.RED + "Nav atrastu lietotāju ar norādītajiem kritērijiem.")
+
+            input(Fore.GREEN + "\nNospiediet Enter, lai atgrieztos uz izvēlni...")
+
     
     def display_all_players(self):
+        while True:
+            column_index1 = 0  # Имя пользователя
+            column_index2 = 2  # Кол-во игр
+            clear_screen()
+            print(Fore.GREEN + "===== Visi lietotaji =====\n")
 
-        column_index1 = 0  # Имя пользователя
-        column_index2 = 2  # Кол-во игр
-        clear_screen()
-        print(Fore.GREEN + "===== Visi lietotaji =====\n")
+            print(Fore.YELLOW + f"{'Lietotājs':<15} {'Spēles':<7}")
+            print("-" * 50)
 
-        print(Fore.YELLOW + f"{'Lietotājs':<15} {'Spēles':<7}")
-        print("-" * 50)
+            players = []
+            with open('blackjack_players.csv', newline='') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    players.append(row)
+                    print(Fore.YELLOW + f"{row[column_index1]:<20} {row[column_index2]:<10}")
+            
+            print()
+            print("  [1] Lai meklet lietotaju...")
+            print("  [Enter] Atgriezties uz galveno izvēlni")
+            choice = input(Fore.GREEN + "\nIevadiet savu izvēli: ").strip()
 
-        players = []
-        with open('blackjack_players.csv', newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                players.append(row)
-                print(Fore.YELLOW + f"{row[column_index1]:<20} {row[column_index2]:<10}")
-
-        print("\nVai jūs vēlaties meklēt lietotāju? (Ievadiet 1, lai meklētu vai jebkuru citu taustiņu, lai izietu)")
-        choice = input(Fore.CYAN +  ">> ")
-
-        if choice == "1":
-            search_name = input("Ievadiet lietotājvārdu, kuru vēlaties atrast: ").strip().lower()
-            found = False
-            print(Fore.CYAN + "\n--- Meklēšanas rezultāti ---\n")
-            for row in players:
-                if search_name in row[column_index1].lower():
-                    print(Fore.GREEN + f"Lietotājs: " + f"{row[column_index1]:<20} Spēles:  {row[column_index2]:<10}")
-                    found = True
+            if choice == "1":
+                search_name = input("Ievadiet lietotājvārdu, kuru vēlaties atrast: ").strip().lower()
+                found = False
+                print(Fore.CYAN + "\n--- Meklēšanas rezultāti ---\n")
+                for row in players:
+                    if search_name in row[column_index1].lower():
+                        print(Fore.GREEN + f"Lietotājs: " + f"{row[column_index1]:<20} Spēles:  {row[column_index2]:<10}")
+                        found = True
+                        a = input(Fore.GREEN + "\nNospiediet Enter, lai atgrieztos uz galveno izvēlni...")
+                if not found:
+                    print(Fore.RED + "Lietotājs nav atrasts.")
                     a = input(Fore.GREEN + "\nNospiediet Enter, lai atgrieztos uz galveno izvēlni...")
-            if not found:
-                print(Fore.RED + "Lietotājs nav atrasts.")
-                a = input(Fore.GREEN + "\nNospiediet Enter, lai atgrieztos uz galveno izvēlni...")
+            else:
+                break
 
 
 if __name__ == "__main__":
