@@ -6,6 +6,9 @@ from colorama import init, Fore
 from datetime import datetime
 import sys
 import time
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Инициализация colorama
 init(autoreset=True)
