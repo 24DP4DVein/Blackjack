@@ -1,92 +1,86 @@
-# two_deer_casino_with_sex_drugs_and_rock_n_roll
-# Daniels Veinbergs un Atrjoms Semjonovs
-
-Blackjack – Konsoles spēle Python valodā
-
-Projekta apraksts
-
-Šis projekts ir Blackjack konsoles versija ar reģistrāciju, bilances sistēmu un likmēm. Spēlētājs spēlē pret dīleri, veicot likmes un pieņemot lēmumus – ņemt karti vai apstāties.
-
+# Daniels Veinbergs un Artjoms Semjonovs  
+## Blackjack – Konsoles spēle Python valodā
 
 ---
 
-Spēles funkcijas
+## 🎲 Projekta apraksts
 
-Reģistrācija un autorizācija – pirmajā startā spēlētājs izveido kontu, un bilance tiek saglabāta starp spēlēm.
-Bilance un likmes – katram spēlētājam ir kredītu bilance, kuru var izmantot likmēm.
-Spēles process – klasiski Blackjack noteikumi:
+Šis projekts ir Blackjack spēles konsoles versija, izstrādāta Python valodā ar uzlabotu funkcionalitāti, tostarp:
 
-Spēlētājs saņem 2 kārtis un izlemj, vai ņemt vēl vai apstāties.
-
-Dīleris ņem kārtis, kamēr viņam ir mazāk par 17 punktiem.
-
-Uzvar tas, kurš ir tuvāk 21 punktam, nepārsniedzot to.
-Datu saglabāšana – spēlētāju bilances tiek saglabātas players.json failā.
-
-
+- Reģistrācijas un autorizācijas sistēma
+- Kredītu bilance un likmes
+- Vairāku spēļu atbalsts vienlaikus ar lietotāja vēstures saglabāšanu
+- Spēles pārtraukšanas un turpināšanas iespēja
+- Statistikas apkopošana
 
 ---
 
-Spēles noteikumi
+## 🕹 Spēles iespējas
 
-Mērķis – savākt 21 punktu vai būt tuvāk tam nekā dīleris.
+### ✅ Reģistrācija un autorizācija
+- Katram spēlētājam tiek izveidots konts ar lietotājvārdu.
+- Lietotāja dati tiek saglabāti `blackjack_players.csv` failā.
+- Bilance tiek saglabāta un atjaunināta starp spēlēm.
 
-Pārpirkšana (vairāk nekā 21 punkts) – automātisks zaudējums.
+### 💰 Bilance un likmes
+- Katram spēlētājam ir sākuma bilance.
+- Likmes tiek veiktas pirms katras spēles.
+- Laimesta aprēķins atkarīgs no spēles iznākuma.
 
-Dūzis (A) – var būt 1 vai 11 punkti, atkarībā no situācijas.
+### ♠️ Spēles gaita
+- Spēlētājs sāk ar 2 kārtīm.
+- Var izvēlēties: `ņemt` vai `apstāties`.
+- Dīleris ņem kārtis, kamēr viņa punkti < 17.
+- Uzvar tas, kurš ir tuvāk 21 punktam, nepārsniedzot to.
 
-Kārtis J, Q, K – katra dod 10 punktus.
+### 🃏 Kāršu vērtības
+- Dūzis (A): 1 vai 11 (automātiski izvēlēts)
+- 2–10: attiecīgā skaitliskā vērtība
+- J, Q, K: 10 punkti
 
-Likme – pirms spēles spēlētājam jāizdara likme.
-
-
-
----
-
-🛠 Kā palaist spēli?
-
-Instalē Python (ja vēl nav)
-
-Lejupielādē Python no oficiālās mājaslapas un instalē to.
-
-Lejupielādē projekta kodu
-
-git clone https://github.com/24DP4DVein/two_deer_casino_with_sex_narkotiki_and_rock_n_roll
-cd blackjack
-
-Vai arī lejupielādē .zip failu un atarhivē to.
-
-Palaid spēli
-
-python blackjack.py
-
+### 💾 Datu saglabāšana
+- Visi spēlētāju dati (bilance, statistika) tiek saglabāti `.csv` failos.
+- Nepabeigta spēle tiek saglabāta, un to var turpināt vēlāk.
+- Tiek uzskaitītas uzvaras, zaudējumi, un Blackjack gadījumi.
 
 ---
 
-Kā darbojas saglabāšana?
+## 📊 Statistika
 
-Pēc pirmās spēles tiek izveidots fails players.json, kur tiek glabātas spēlētāju bilances.
-
-Ja spēlētājs jau ir reģistrējies, viņš turpina spēli ar to pašu bilanci.
-
-Bilance tiek automātiski atjaunināta pēc katras spēles.
-
-
+Pēc katras spēles spēlētājs var:
+- Apskatīt savu spēles vēsturi
+- Redzēt, cik reizes uzvarēts, zaudēts, un cik reizes iegūts Blackjack
+- Pārbaudīt savu aktuālo bilanci
 
 ---
 
-Ko varētu uzlabot?
+## 🛠 Kā palaist spēli?
 
-🔹 Grafiskais interfeiss (tkinter vai pygame)
-🔹 1.5x laimests par Blackjack (21 ar divām kārtīm)
-🔹 Tiešsaistes režīms ar spēli pret citiem spēlētājiem
+1. **Instalē Python (ja vēl nav)**
+   - [Lejupielādē Python](https://www.python.org/downloads/) un instalē.
 
+2. **Lejupielādē projektu**
+   ```bash
+   git clone https://github.com/24DP4DVein/two_deer_casino_with_sex_narkotiki_and_rock_n_roll
+   cd blackjack
 
----
+## 🧠 Kā darbojas saglabāšana?
 
+Visi spēlētāju dati tiek uzglabāti `blackjack_players.csv`.
 
+Ja spēle tiek pārtraukta (Ctrl+C vai izvēlne), to var turpināt vēlāk.
 
+Bilance un statistika tiek atjaunināta automātiski pēc katras partijas.
 
----
+## 💡 Ko varētu uzlabot nākotnē?
 
-Ja tev ir idejas, kā uzlabot spēli, droši piedalies izstrādē! 
+- 🔹 Grafiskais interfeiss (piemēram, ar pygame vai tkinter)
+- 🔹 1.5x laimests par Blackjack
+- 🔹 Tiešsaistes režīms pret citiem spēlētājiem
+- 🔹 Vairāku kārtu turnīru režīms
+
+Ja tev ir idejas vai vēlme piedalīties projektā – droši pievienojies GitHub!
+
+## 📂 Licencēšana
+
+Projekts ir izstrādāts mācību nolūkiem un ir brīvi izmantojams un uzlabojams.
